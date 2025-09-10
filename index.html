@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Count-Up (8R) — タップ専用ライト版</title>
+<title>Count-Up (8R) — タップ専用ライト版（Enter/確定で進む）</title>
 <style>
   :root { --gap: 10px; --radius: 12px; }
   * { box-sizing: border-box; }
@@ -20,7 +20,8 @@
   .rounds { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
   .round { border:1px solid #eee; border-radius:10px; padding:10px; background:#fafafa; }
   .round h3 { margin:0 0 8px; font-size:1rem; }
-  .round input { width:100%; padding:10px; font-size:1.1rem; border:1px solid #ccc; border-radius:8px; }
+  .round .ctrl { display:flex; gap:8px; align-items:center; }
+  .round input { flex:1 1 auto; padding:10px; font-size:1.1rem; border:1px solid #ccc; border-radius:8px; }
   .hint { color:#666; font-size:.9rem; }
   .big { font-size:1.05rem; }
   .stats { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
@@ -37,7 +38,7 @@
 <body>
 <header>
   <h1>Count-Up (8R)</h1>
-  <div class="sub">タップ/数値入力のみで高速計測。入力ごとに自動で次ラウンドへ進みます。</div>
+  <div class="sub">タップ/数値入力のみ。<b>Enter</b>か<b>「確定」</b>で次ラウンドへ。</div>
 </header>
 
 <section class="card">
@@ -141,7 +142,10 @@
       div.className = 'round';
       div.innerHTML = `
         <h3>R${i+1}</h3>
-        <input data-round="${i}" type="number" inputmode="numeric" min="0" max="180" step="1" placeholder="0〜180" value="${val!==null?val:''}">
+        <div class="ctrl">
+          <input data-round="${i}" type="number" inputmode="numeric" min="0" max="180" step="1" placeholder="0〜180" value="${val!==null?val:''}">
+          <button class="confirm" data-round="${i}">確定</button>
+        </div>
       `;
       roundsEl.appendChild(div);
     }
@@ -149,25 +153,25 @@
     const total = filled.reduce((a,b)=>a+b,0);
     runningTotalEl.textContent = total;
     runningAvgEl.textContent = filled.length ? (total/filled.length).toFixed(1) : '0.0';
-    finishBtn.disabled = filled.length !== ROUNDS;
     const cur = roundsEl.querySelector(`input[data-round="${current.idx}"]`);
     if(cur){ cur.focus(); setTimeout(()=>{ cur.selectionStart = cur.value.length; cur.selectionEnd = cur.value.length; }, 0); }
+    finishBtn.disabled = filled.length !== ROUNDS;
   }
 
   function setRoundValue(r, value){
     const v = Math.max(0, Math.min(180, Number(value)||0));
     current.scores[r] = v;
-    const total = current.scores.filter(n=>typeof n==='number').reduce((a,b)=>a+b,0);
     // 自動で次へ
     current.idx = Math.min(ROUNDS, r+1);
+    renderRunning();
     updateUI();
   }
 
-  function setRoundValueFromText(r, text){
-    const score = extractScore(text);
-    if(score===null || isNaN(score)) return false;
-    setRoundValue(r, score);
-    return true;
+  function renderRunning(){
+    const filled = current.scores.filter(n=>typeof n==='number');
+    const total = filled.reduce((a,b)=>a+b,0);
+    runningTotalEl.textContent = total;
+    runningAvgEl.textContent = filled.length ? (total/filled.length).toFixed(1) : '0.0';
   }
 
   function renderHistory(){
@@ -223,21 +227,25 @@
     }
   }
 
-  // イベント
-  document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
-  document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
-  finishBtn.addEventListener('click', saveGame);
-  undoBtn.addEventListener('click', undo);
-  roundsEl.addEventListener('input', (e)=>{
+  // 入力欄：Enterで確定
+  roundsEl.addEventListener('keydown', (e)=>{
     const target = e.target;
     if(!target || !target.matches('input[data-round]')) return;
-    const r = parseInt(target.dataset.round,10);
-    const v = target.value;
-    // 1〜3桁入力 or スペース/改行で確定→次へ
-    if(/^\d{1,3}$/.test(v) || /[ \n　]$/.test(v)){ setRoundValue(r, v); }
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      const r = parseInt(target.dataset.round,10);
+      setRoundValue(r, target.value);
+    }
+  });
+  // 入力欄：確定ボタンで確定
+  roundsEl.addEventListener('click', (e)=>{
+    const btn = e.target.closest('button.confirm'); if(!btn) return;
+    const r = parseInt(btn.dataset.round,10);
+    const input = roundsEl.querySelector(`input[data-round="${r}"]`);
+    setRoundValue(r, input ? input.value : 0);
   });
 
-  // ナンバーパッド／チップ
+  // ナンバーパッド／チップ（押したら即確定→次へ）
   document.getElementById('pad').addEventListener('click', (e)=>{
     const btn = e.target.closest('button[data-val]'); if(!btn) return;
     setRoundValue(current.idx, parseInt(btn.dataset.val,10));
@@ -248,9 +256,16 @@
     if(chip.dataset.val){ setRoundValue(current.idx, parseInt(chip.dataset.val,10)); return; }
     if(chip.dataset.step){
       const cur = current.scores[current.idx] ?? 0;
-      setRoundValue(current.idx, cur + parseInt(chip.dataset.step,10));
+      const next = Math.max(0, Math.min(180, cur + parseInt(chip.dataset.step,10)));
+      setRoundValue(current.idx, next);
     }
   });
+
+  // 上部ボタン
+  document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
+  document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
+  document.getElementById('finishBtn').addEventListener('click', saveGame);
+  document.getElementById('undoBtn').addEventListener('click', undo);
 
   // 初期化
   renderHistory();
