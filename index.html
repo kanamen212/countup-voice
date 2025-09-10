@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Count-Up Dictation Scorer (iOS向け・8R)</title>
+<title>Count-Up Dictation Scorer (iOS向け・8R, 🎤優先)</title>
 <style>
   :root { --gap: 10px; --radius: 12px; }
   * { box-sizing: border-box; }
@@ -129,9 +129,10 @@
       const val = current.scores[i];
       const div = document.createElement('div');
       div.className = 'round';
+      /* 🎤優先: inputmodeを付けず、type="text" のみ */
       div.innerHTML = `
         <h3>R${i+1}</h3>
-        <input data-round="${i}" type="text" inputmode="numeric" placeholder="ここに音声入力/手入力（0〜180）" value="${val!==null?val:''}">
+        <input data-round="${i}" type="text" placeholder="ここに音声入力/手入力（0〜180）" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" value="${val!==null?val:''}">
       `;
       roundsEl.appendChild(div);
     }
@@ -230,6 +231,8 @@
     if(e.key === 'Enter'){ e.preventDefault(); tryAdvance(); }
   });
 
+  document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
+  document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
   focusBtn.addEventListener('click', ()=>{
     const cur = roundsEl.querySelector(`input[data-round="${current.idx}"]`);
     if(cur){ cur.focus(); cur.select(); }
@@ -237,8 +240,6 @@
   finishBtn.addEventListener('click', saveGame);
   undoBtn.addEventListener('click', undo);
   toggleTTSBtn.addEventListener('click', ()=>{ ttsEnabled=!ttsEnabled; ttsStatusEl.textContent = ttsEnabled?'ON':'OFF'; });
-  document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
-  document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
 
   renderHistory();
   updateUI();
