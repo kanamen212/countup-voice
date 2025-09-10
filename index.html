@@ -3,49 +3,48 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Count-Up Dictation Scorer (iOS向け・8R, 🎤優先)</title>
+<title>Count-Up (8R) — タップ専用ライト版</title>
 <style>
   :root { --gap: 10px; --radius: 12px; }
   * { box-sizing: border-box; }
-  body { font-family: -apple-system, system-ui, "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
-    margin: 0; padding: 16px; background: #f7f7f7; color: #111; }
-  header { margin-bottom: 12px; }
-  h1 { font-size: 1.25rem; margin: 0 0 6px; }
-  .sub { color: #555; font-size: 0.95rem; }
-  .card { background: #fff; border-radius: 12px; padding: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.06); margin-bottom: 12px; }
-  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-  .pill { display: inline-block; padding: 4px 10px; background: #efefef; border-radius: 999px; font-size: .9rem; }
-  button { padding: 12px 14px; border-radius: 10px; border: 1px solid #ddd; background: #fff; font-size: 1rem; }
-  button.primary { background: #222; color: #fff; border-color: #222; }
-  button.warn { background: #fff0f0; border-color: #f3b8b8; color: #a40000; }
-  .rounds { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
-  .round { border: 1px solid #eee; border-radius: 10px; padding: 10px; background: #fafafa; }
-  .round h3 { margin: 0 0 8px; font-size: 1rem; }
-  .round input { width: 100%; padding: 10px; font-size: 1.1rem; border: 1px solid #ccc; border-radius: 8px; }
-  .hint { color: #666; font-size: .9rem; }
-  .big { font-size: 1.05rem; }
-  .stats { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
-  .stat { background: #fafafa; border: 1px solid #eee; border-radius: 10px; padding: 10px; }
-  .list table { width: 100%; border-collapse: collapse; }
-  .list th, .list td { text-align: right; padding: 8px; border-bottom: 1px solid #eee; }
-  .list th:first-child, .list td:first-child { text-align: left; }
+  body { font-family: -apple-system, system-ui, "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif; margin:0; padding:16px; background:#f7f7f7; color:#111; }
+  header { margin-bottom:12px; }
+  h1 { font-size:1.25rem; margin:0 0 6px; }
+  .sub { color:#555; font-size:.95rem; }
+  .card { background:#fff; border-radius:12px; padding:14px; box-shadow:0 1px 4px rgba(0,0,0,.06); margin-bottom:12px; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .pill { display:inline-block; padding:4px 10px; background:#efefef; border-radius:999px; font-size:.9rem; }
+  button { padding:12px 14px; border-radius:10px; border:1px solid #ddd; background:#fff; font-size:1rem; }
+  button.primary { background:#222; color:#fff; border-color:#222; }
+  button.warn { background:#fff0f0; border-color:#f3b8b8; color:#a40000; }
+  .rounds { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+  .round { border:1px solid #eee; border-radius:10px; padding:10px; background:#fafafa; }
+  .round h3 { margin:0 0 8px; font-size:1rem; }
+  .round input { width:100%; padding:10px; font-size:1.1rem; border:1px solid #ccc; border-radius:8px; }
+  .hint { color:#666; font-size:.9rem; }
+  .big { font-size:1.05rem; }
+  .stats { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+  .stat { background:#fafafa; border:1px solid #eee; border-radius:10px; padding:10px; }
+  .list table { width:100%; border-collapse:collapse; }
+  .list th, .list td { text-align:right; padding:8px; border-bottom:1px solid #eee; }
+  .list th:first-child, .list td:first-child { text-align:left; }
+  .pad { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:8px; }
+  .pad button { padding:14px 10px; border-radius:12px; font-size:1.1rem; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .chip { padding:8px 10px; border:1px solid #ddd; border-radius:999px; background:#fafafa; }
 </style>
 </head>
 <body>
 <header>
-  <h1>Count-Up Dictation Scorer (8R)</h1>
-  <div class="sub">iOSの<strong>キーボード音声入力（🎤）</strong>で数値を話すと、<strong>自動で次ラウンドに進む</strong>版です。マイク許可は不要。</div>
+  <h1>Count-Up (8R)</h1>
+  <div class="sub">タップ/数値入力のみで高速計測。入力ごとに自動で次ラウンドへ進みます。</div>
 </header>
 
 <section class="card">
   <div class="row">
-    <button id="focusBtn" class="primary">🎤 開始（現在ラウンドにフォーカス）</button>
-    <button id="finishBtn" class="">ゲームを確定</button>
-    <button id="undoBtn" class="">直前ラウンド取消</button>
-    <div class="pill">TTS: <span id="ttsStatus">ON</span></div>
-    <button id="toggleTTS">読み上げ ON/OFF</button>
+    <button id="finishBtn" class="primary">ゲームを確定</button>
+    <button id="undoBtn">直前ラウンド取消</button>
   </div>
-  <div class="hint">話し方例: <span class="pill">140</span> <span class="pill">100点</span> <span class="pill">ミス</span> <span class="pill">ゼロ</span> <span class="pill">シングルブル</span> <span class="pill">ダブルブル</span></div>
 </section>
 
 <section class="card">
@@ -56,7 +55,27 @@
     <div class="pill">平均/ラウンド: <span id="runningAvg">0.0</span></div>
   </div>
   <div class="rounds" id="rounds"></div>
-  <div class="hint big">※「開始」を1回押して、ソフトキーボードの🎤で数字を話す → 自動で次ラウンドにフォーカスされます（手でタップしなくてOK）。</div>
+
+  <div class="hint big" style="margin-top:8px;">■ 大型ナンバーパッド（片手操作）</div>
+  <div class="pad" id="pad">
+    <button data-val="20">20</button>
+    <button data-val="40">40</button>
+    <button data-val="60">60</button>
+    <button data-val="80">80</button>
+    <button data-val="100">100</button>
+    <button data-val="120">120</button>
+    <button data-val="140">140</button>
+    <button data-val="160">160</button>
+    <button data-val="180">180</button>
+  </div>
+  <div class="chips">
+    <span class="chip" data-val="0">ミス/ゼロ</span>
+    <span class="chip" data-val="25">25（S-BULL）</span>
+    <span class="chip" data-val="50">50（D-BULL）</span>
+    <span class="chip" data-step="-5">−5</span>
+    <span class="chip" data-step="5">＋5</span>
+    <span class="chip" id="skipChip">スキップ</span>
+  </div>
 </section>
 
 <section class="card">
@@ -95,9 +114,6 @@
   const currentRoundEl = document.getElementById('currentRound');
   const finishBtn = document.getElementById('finishBtn');
   const undoBtn = document.getElementById('undoBtn');
-  const focusBtn = document.getElementById('focusBtn');
-  const toggleTTSBtn = document.getElementById('toggleTTS');
-  const ttsStatusEl = document.getElementById('ttsStatus');
   const gamesCountEl = document.getElementById('gamesCount');
   const careerAvgEl = document.getElementById('careerAvg');
   const bestTotalEl = document.getElementById('bestTotal');
@@ -105,19 +121,13 @@
   const historyTableBody = document.querySelector('#historyTable tbody');
 
   let current = { scores: Array(ROUNDS).fill(null), idx: 0 };
-  let ttsEnabled = true;
-
-  function speak(text){
-    if(!ttsEnabled) return;
-    try { const u = new SpeechSynthesisUtterance(text); u.lang='ja-JP'; speechSynthesis.speak(u); } catch(e){}
-  }
 
   function extractScore(text){
-    if(!text) return null;
+    if(text==null) return null;
     const t = String(text).trim();
-    const numMatch = t.replace(/、/g,' ').match(/-?\d+/);
-    if(numMatch){ return parseInt(numMatch[0],10); }
-    const map = { 'ミス':0, 'ノー':0, 'ゼロ':0, 'シングルブル':25, 'ダブルブル':50, 'ブル':50 };
+    const m = t.match(/-?\d+/);
+    if(m) return parseInt(m[0],10);
+    const map = { 'ミス':0, 'ゼロ':0, 'シングルブル':25, 'ダブルブル':50, 'ブル':50 };
     for(const k in map){ if(t.includes(k)) return map[k]; }
     return null;
   }
@@ -129,10 +139,9 @@
       const val = current.scores[i];
       const div = document.createElement('div');
       div.className = 'round';
-      /* 🎤優先: inputmodeを付けず、type="text" のみ */
       div.innerHTML = `
         <h3>R${i+1}</h3>
-        <input data-round="${i}" type="text" placeholder="ここに音声入力/手入力（0〜180）" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" value="${val!==null?val:''}">
+        <input data-round="${i}" type="number" inputmode="numeric" min="0" max="180" step="1" placeholder="0〜180" value="${val!==null?val:''}">
       `;
       roundsEl.appendChild(div);
     }
@@ -141,28 +150,24 @@
     runningTotalEl.textContent = total;
     runningAvgEl.textContent = filled.length ? (total/filled.length).toFixed(1) : '0.0';
     finishBtn.disabled = filled.length !== ROUNDS;
-    const curInput = roundsEl.querySelector(`input[data-round="${current.idx}"]`);
-    if(curInput){ curInput.focus(); setTimeout(()=>{ curInput.selectionStart = curInput.value.length; curInput.selectionEnd = curInput.value.length; }, 0); }
+    const cur = roundsEl.querySelector(`input[data-round="${current.idx}"]`);
+    if(cur){ cur.focus(); setTimeout(()=>{ cur.selectionStart = cur.value.length; cur.selectionEnd = cur.value.length; }, 0); }
+  }
+
+  function setRoundValue(r, value){
+    const v = Math.max(0, Math.min(180, Number(value)||0));
+    current.scores[r] = v;
+    const total = current.scores.filter(n=>typeof n==='number').reduce((a,b)=>a+b,0);
+    // 自動で次へ
+    current.idx = Math.min(ROUNDS, r+1);
+    updateUI();
   }
 
   function setRoundValueFromText(r, text){
     const score = extractScore(text);
     if(score===null || isNaN(score)) return false;
-    const clamped = Math.max(0, Math.min(180, score));
-    current.scores[r] = clamped;
-    const total = current.scores.filter(v=>typeof v==='number').reduce((a,b)=>a+b,0);
-    speak(`ラウンド${r+1}、${clamped}点。合計 ${total} 点。`);
+    setRoundValue(r, score);
     return true;
-  }
-
-  function tryAdvance(){
-    const r = current.idx;
-    const input = roundsEl.querySelector(`input[data-round="${r}"]`);
-    if(!input) return;
-    if(setRoundValueFromText(r, input.value)){
-      current.idx = Math.min(ROUNDS, r+1);
-      updateUI();
-    }
   }
 
   function renderHistory(){
@@ -193,7 +198,6 @@
     const hist = loadHistory();
     hist.push({ date: new Date().toISOString(), rounds: current.scores.slice(), total, avg });
     localStorage.setItem('countupHistory', JSON.stringify(hist));
-    speak(`保存しました。合計 ${total} 点、平均 ${avg.toFixed(1)} 点です。`);
     renderHistory();
     current = { scores:Array(ROUNDS).fill(null), idx:0 };
     updateUI();
@@ -215,32 +219,40 @@
   function clearHistory(){ if(confirm('履歴をすべて消去します。よろしいですか？')){ localStorage.removeItem('countupHistory'); renderHistory(); } }
   function undo(){
     for(let i=ROUNDS-1;i>=0;i--){
-      if(typeof current.scores[i]==='number'){ current.scores[i]=null; current.idx=i; updateUI(); speak(`ラウンド${i+1}を取り消しました。`); return; }
+      if(typeof current.scores[i]==='number'){ current.scores[i]=null; current.idx=i; updateUI(); return; }
     }
-    speak('取り消すスコアがありません。');
   }
 
-  roundsEl.addEventListener('input', (e)=>{
-    const target = e.target;
-    if(target && target.matches('input[data-round]')){
-      const v = target.value;
-      if(/[ \n　]/.test(v) || /^\d{1,3}$/.test(v)){ tryAdvance(); }
-    }
-  });
-  roundsEl.addEventListener('keydown', (e)=>{
-    if(e.key === 'Enter'){ e.preventDefault(); tryAdvance(); }
-  });
-
+  // イベント
   document.getElementById('exportCsvBtn').addEventListener('click', exportCsv);
   document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
-  focusBtn.addEventListener('click', ()=>{
-    const cur = roundsEl.querySelector(`input[data-round="${current.idx}"]`);
-    if(cur){ cur.focus(); cur.select(); }
-  });
   finishBtn.addEventListener('click', saveGame);
   undoBtn.addEventListener('click', undo);
-  toggleTTSBtn.addEventListener('click', ()=>{ ttsEnabled=!ttsEnabled; ttsStatusEl.textContent = ttsEnabled?'ON':'OFF'; });
+  roundsEl.addEventListener('input', (e)=>{
+    const target = e.target;
+    if(!target || !target.matches('input[data-round]')) return;
+    const r = parseInt(target.dataset.round,10);
+    const v = target.value;
+    // 1〜3桁入力 or スペース/改行で確定→次へ
+    if(/^\d{1,3}$/.test(v) || /[ \n　]$/.test(v)){ setRoundValue(r, v); }
+  });
 
+  // ナンバーパッド／チップ
+  document.getElementById('pad').addEventListener('click', (e)=>{
+    const btn = e.target.closest('button[data-val]'); if(!btn) return;
+    setRoundValue(current.idx, parseInt(btn.dataset.val,10));
+  });
+  document.querySelector('.chips').addEventListener('click', (e)=>{
+    const chip = e.target.closest('.chip'); if(!chip) return;
+    if(chip.id==='skipChip'){ current.idx = Math.min(ROUNDS, current.idx+1); updateUI(); return; }
+    if(chip.dataset.val){ setRoundValue(current.idx, parseInt(chip.dataset.val,10)); return; }
+    if(chip.dataset.step){
+      const cur = current.scores[current.idx] ?? 0;
+      setRoundValue(current.idx, cur + parseInt(chip.dataset.step,10));
+    }
+  });
+
+  // 初期化
   renderHistory();
   updateUI();
 })();
